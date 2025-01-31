@@ -1,0 +1,16 @@
+[Unit]
+Description=FastAPI Service
+After=network.target
+
+[Service]
+Type=simple
+User=task
+WorkingDirectory=/opt/sample-task
+# Öüne bir reverse proxy konulması amacıyla host'u localhost olarak bırakıldı
+ExecStart=/usr/bin/python3 -m uvicorn main:app --host 127.0.0.1 --port 8000
+Restart=always
+StandardOutput=append:/var/log/task.log
+StandardError=append:/var/log/task.log
+
+[Install]
+WantedBy=multi-user.target

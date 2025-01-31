@@ -1,0 +1,58 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: hello-there
+spec:
+  selector:
+    matchLabels:
+      app: hello-there
+  template:
+    metadata:
+      labels:
+        app: hello-there
+    spec:
+      volumes:
+      - name: env
+        secret:
+          secretName: hello-there
+      containers:
+        - name: fastapi-server
+          image: saidimtaylan/sample-hello-there:v1
+          ports:
+          - containerPort: 8000
+          resources:
+            requests:
+              memory: "100Mi"
+              cpu: "100m"
+            limits:
+              memory: "400Mi"
+              cpu: "500m"
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 8000
+            periodSeconds: 10
+            failureThreshold: 3
+            timeoutSeconds: 10
+          securityContext:
+            allowPrivilegeEscalation: false
+            runAsNonRoot: true
+            runAsUser: 1000
+            runAsGroup: 1000
+            capabilities:
+              drop:
+                - ALL
+            seccompProfile:
+              type: RuntimeDefault
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: hello-there
+spec:
+  selector:
+    app: hello-there
+  ports:
+    - name: http
+      port: 80
+      targetPort: 8000
